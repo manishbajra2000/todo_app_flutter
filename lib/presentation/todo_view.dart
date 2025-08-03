@@ -155,7 +155,8 @@ class TodoView extends StatelessWidget {
                           final picked = await showDatePicker(
                             context: context,
                             initialDate: selectedDueDate ?? DateTime.now(),
-                            firstDate: DateTime(2000),
+                            firstDate:
+                                DateTime.now(), // Prevent selecting before today
                             lastDate: DateTime(2100),
                           );
                           if (picked != null)
@@ -356,7 +357,8 @@ class TodoView extends StatelessWidget {
                           final picked = await showDatePicker(
                             context: context,
                             initialDate: selectedDueDate ?? DateTime.now(),
-                            firstDate: DateTime(2000),
+                            firstDate:
+                                DateTime.now(), // Prevent selecting before today
                             lastDate: DateTime(2100),
                           );
                           if (picked != null)
@@ -465,21 +467,69 @@ class _TodoViewWithSortingState extends State<_TodoViewWithSorting> {
       appBar: AppBar(
         title: const Text('Todos'),
         actions: [
-          DropdownButton<String>(
-            value: filter,
-            onChanged: (v) => setState(() => filter = v!),
-            items: [
-              'All',
-              'Active',
-              'Completed',
-            ].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.purple[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.deepPurple, width: 1.2),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: filter,
+                    icon: const Icon(
+                      Icons.filter_list,
+                      color: Colors.deepPurple,
+                    ),
+                    dropdownColor: Colors.purple[50],
+                    style: const TextStyle(
+                      color: Colors.deepPurple,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onChanged: (v) => setState(() => filter = v!),
+                    items: ['All', 'Active', 'Completed']
+                        .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ),
           ),
-          DropdownButton<String>(
-            value: sortBy,
-            onChanged: (v) => setState(() => sortBy = v!),
-            items: ['Due Date', 'Priority']
-                .map((s) => DropdownMenuItem(value: s, child: Text('Sort: $s')))
-                .toList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.purple[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.deepPurple, width: 1.2),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: sortBy,
+                    icon: const Icon(Icons.sort, color: Colors.deepPurple),
+                    dropdownColor: Colors.purple[50],
+                    style: const TextStyle(
+                      color: Colors.deepPurple,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onChanged: (v) => setState(() => sortBy = v!),
+                    items: ['Due Date', 'Priority']
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text('Sort: $s'),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -504,84 +554,92 @@ class _TodoViewWithSortingState extends State<_TodoViewWithSorting> {
               (a, b) => a.priority.index.compareTo(b.priority.index),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
+          return AnimatedList(
+            key: ValueKey(filtered.length),
+            initialItemCount: filtered.length,
+            itemBuilder: (context, index, animation) {
               final todo = filtered[index];
-              Color priorityColor;
-              switch (todo.priority) {
-                case TodoPriority.high:
-                  priorityColor = Colors.redAccent;
-                  break;
-                case TodoPriority.medium:
-                  priorityColor = Colors.orangeAccent;
-                  break;
-                case TodoPriority.low:
-                  priorityColor = Colors.green;
-                  break;
-              }
-              return Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
+              return SizeTransition(
+                sizeFactor: animation,
+                child: Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  title: Text(
-                    todo.text,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                      decoration: todo.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
-                  ),
-                  subtitle: Row(
-                    children: [
-                      Icon(Icons.flag, color: priorityColor, size: 18),
-                      const SizedBox(width: 4),
-                      Text(
-                        todo.priority.name[0].toUpperCase() +
-                            todo.priority.name.substring(1),
-                        style: TextStyle(
-                          color: priorityColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    title: Text(
+                      todo.text,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        decoration: todo.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
-                      if (todo.dueDate != null) ...[
-                        const SizedBox(width: 16),
+                    ),
+                    subtitle: Row(
+                      children: [
                         Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: Colors.blueGrey,
+                          Icons.flag,
+                          color: todo.priority == TodoPriority.high
+                              ? Colors.red
+                              : todo.priority == TodoPriority.medium
+                              ? Colors.orange
+                              : Colors.green,
+                          size: 18,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${todo.dueDate!.toLocal().toString().split(' ')[0]}',
-                          style: const TextStyle(color: Colors.blueGrey),
+                          todo.priority.name[0].toUpperCase() +
+                              todo.priority.name.substring(1),
+                          style: TextStyle(
+                            color: todo.priority == TodoPriority.high
+                                ? Colors.red
+                                : todo.priority == TodoPriority.medium
+                                ? Colors.orange
+                                : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
+                        if (todo.dueDate != null) ...[
+                          const SizedBox(width: 16),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${todo.dueDate!.toLocal().year}-${todo.dueDate!.toLocal().month.toString().padLeft(2, '0')}-${todo.dueDate!.toLocal().day.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  onTap: () => widget.showEditTodoBox(context, todo),
-                  leading: Checkbox(
-                    value: todo.isCompleted,
-                    onChanged: (value) =>
-                        widget.todoCubit.toggleCompletion(todo),
-                    activeColor: priorityColor,
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: Colors.redAccent,
                     ),
-                    onPressed: () => widget.todoCubit.deleteTodo(todo),
+                    onTap: () => widget.showEditTodoBox(context, todo),
+                    leading: Checkbox(
+                      value: todo.isCompleted,
+                      onChanged: (value) =>
+                          widget.todoCubit.toggleCompletion(todo),
+                      activeColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => widget.todoCubit.deleteTodo(todo),
+                    ),
                   ),
                 ),
               );
