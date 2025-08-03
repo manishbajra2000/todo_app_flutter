@@ -22,11 +22,30 @@ void main() async {
   runApp(MyApp(todoRepo: isarTodoRepo));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // database injection through the app
   final TodoRepo todoRepo;
 
   const MyApp({super.key, required this.todoRepo});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void _toggleTheme() {
+    setState(() {
+      if (_themeMode == ThemeMode.light) {
+        _themeMode = ThemeMode.dark;
+      } else if (_themeMode == ThemeMode.dark) {
+        _themeMode = ThemeMode.light;
+      } else {
+        _themeMode = ThemeMode.dark;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +64,12 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system,
-      home: TodoPage(todoRepo: todoRepo),
+      themeMode: _themeMode,
+      home: TodoPage(
+        todoRepo: widget.todoRepo,
+        onToggleTheme: _toggleTheme,
+        themeMode: _themeMode,
+      ),
     );
   }
 }

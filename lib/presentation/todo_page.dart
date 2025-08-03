@@ -14,14 +14,21 @@ import 'package:todo_app/presentation/todo_view.dart';
 
 class TodoPage extends StatelessWidget {
   final TodoRepo todoRepo;
+  final VoidCallback onToggleTheme;
+  final ThemeMode themeMode;
 
-  const TodoPage({super.key, required this.todoRepo});
+  const TodoPage({
+    super.key,
+    required this.todoRepo,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TodoCubit(todoRepo),
-      child: const TodoView(),
+      child: TodoView(onToggleTheme: onToggleTheme, themeMode: themeMode),
     );
   }
 }

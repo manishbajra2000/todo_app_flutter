@@ -12,7 +12,14 @@ import 'package:todo_app/domain/models/todo.dart';
 import 'package:todo_app/presentation/todo_cubit.dart';
 
 class TodoView extends StatelessWidget {
-  const TodoView({super.key});
+  final VoidCallback onToggleTheme;
+  final ThemeMode themeMode;
+
+  const TodoView({
+    super.key,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
 
   // show dialog box for user to type
   void _showAddTodoBox(BuildContext context) {
@@ -435,6 +442,8 @@ class TodoView extends StatelessWidget {
       todoCubit: todoCubit,
       showAddTodoBox: _showAddTodoBox,
       showEditTodoBox: _showEditTodoBox,
+      onToggleTheme: onToggleTheme,
+      themeMode: themeMode,
     );
   }
 }
@@ -444,10 +453,14 @@ class _TodoViewWithSorting extends StatefulWidget {
   final TodoCubit todoCubit;
   final void Function(BuildContext) showAddTodoBox;
   final void Function(BuildContext, Todo) showEditTodoBox;
+  final VoidCallback onToggleTheme;
+  final ThemeMode themeMode;
   const _TodoViewWithSorting({
     required this.todoCubit,
     required this.showAddTodoBox,
     required this.showEditTodoBox,
+    required this.onToggleTheme,
+    required this.themeMode,
   });
   @override
   State<_TodoViewWithSorting> createState() => _TodoViewWithSortingState();
@@ -460,13 +473,26 @@ class _TodoViewWithSortingState extends State<_TodoViewWithSorting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add),
+        label: const Text('Add Task'),
         onPressed: () => widget.showAddTodoBox(context),
       ),
       appBar: AppBar(
         title: const Text('Todos'),
         actions: [
+          IconButton(
+            icon: Icon(
+              widget.themeMode == ThemeMode.dark
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+              color: Colors.deepPurple,
+            ),
+            tooltip: widget.themeMode == ThemeMode.dark
+                ? 'Switch to Light Mode'
+                : 'Switch to Dark Mode',
+            onPressed: widget.onToggleTheme,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             child: DecoratedBox(
