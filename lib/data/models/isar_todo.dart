@@ -17,10 +17,24 @@ class TodoIsar {
   Id id = Isar.autoIncrement;
   late String text;
   late bool isCompleted;
+  int priority = 1; // Default to medium
+  DateTime? dueDate;
 
   // convert isar object -> pure todo object to use in our app
   Todo toDomain() {
-    return Todo(id: id, text: text, isCompleted: isCompleted);
+    TodoPriority safePriority;
+    if (priority >= 0 && priority < TodoPriority.values.length) {
+      safePriority = TodoPriority.values[priority];
+    } else {
+      safePriority = TodoPriority.medium;
+    }
+    return Todo(
+      id: id,
+      text: text,
+      isCompleted: isCompleted,
+      priority: safePriority,
+      dueDate: dueDate,
+    );
   }
 
   // convert pure todo object -> isar object to store in isar db
@@ -28,6 +42,8 @@ class TodoIsar {
     return TodoIsar()
       ..id = todo.id
       ..text = todo.text
-      ..isCompleted = todo.isCompleted;
+      ..isCompleted = todo.isCompleted
+      ..priority = todo.priority.index
+      ..dueDate = todo.dueDate;
   }
 }

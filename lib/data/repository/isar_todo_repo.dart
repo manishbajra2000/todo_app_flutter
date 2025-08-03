@@ -28,6 +28,13 @@ class IsarTodoRepo implements TodoRepo {
     return todos.map((TodoIsar) => TodoIsar.toDomain()).toList();
   }
 
+  //get todo by id
+@override
+Future<Todo?> getTodoById(int id) async {
+  final todoIsar = await db.todoIsars.get(id);
+  return todoIsar?.toDomain();
+}
+
   // add todo
   @override
   Future<void> addTodo(Todo newTodo) async {

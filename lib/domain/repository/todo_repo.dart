@@ -11,6 +11,7 @@ import 'package:todo_app/domain/models/todo.dart';
 abstract class TodoRepo {
   // get a list of todos
   Future<List<Todo>> getTodos();
+  Future<Todo?> getTodoById(int id);
 
   // add a new todo
   Future<void> addTodo(Todo newTodo);
